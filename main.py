@@ -8,12 +8,7 @@ import datetime
 import wikipedia
 import webbrowser
 import os
-import time
-import subprocess
-import ecapture as ec
-import wolframalpha
-import json
-import requests
+import random
 import openai
 from dotenv import load_dotenv
 
@@ -30,6 +25,7 @@ voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 activationPhrases = ['jarvis', 'hey jarvis', 'ok jarvis', 'hello jarvis', 'hi jarvis']
 shutdownPhrases = ['goodbye', 'ok bye', 'stop', 'shut down', 'shutdown', 'exit', 'quit', 'bye']
+greetings = ["Hello, sir.", "Greetings, sir.", "How can I assist you today?"]
 
 def speak(text, rate=150):
 	print(f'Jarvis: {text}')
@@ -37,67 +33,54 @@ def speak(text, rate=150):
 	engine.say(text)
 	engine.runAndWait()
 
-def wishMe():
-	hour = datetime.datetime.now().hour
-	if hour >= 0 and hour < 12:
-		speak('Good Morning Sir!')
-	elif hour >= 12 and hour < 18:
-		speak('Good Afternoon Sir!')
-	else:
-		speak('Good Evening Sir!')
+def greet():
+	return random.choice(greetings)
 
-	speak('I am JARVIS. How may I help you today?')
-
-def takeCommand(pause_threshold = 2):
+def takeCommand(pause_threshold=1):
 	r = sr.Recognizer()
 	r.pause_threshold = pause_threshold
 	with sr.Microphone() as source:
-		print('Listening...')
 		audio = r.listen(source)
 
 	try:
 		statement = r.recognize_google(audio, language=language)
-
 		print(f'user said: {statement}\n')
 
 	except Exception as e:
 		print(e)
 		return 'None'
+	
 	return statement
 
-def ask_gpt3(question):
-    # Step 1: send the conversation and available functions to GPT
-    response = openai.ChatCompletion.create(
-		model="gpt-3.5-turbo",
-		messages=[
-			{
-			"role": "user",
-			"content": question
-			}
-		],
-		temperature=1,
-		max_tokens=256,
-		top_p=1,
-		frequency_penalty=0,
-		presence_penalty=0
+def ask_gpt3(prompt):
+	response = openai.Completion.create(
+		engine="davinci",
+		prompt=prompt,
+		temperature=0.7,
+		max_tokens=100,
+		top_p=1.0,
+		frequency_penalty=0.0,
+		presence_penalty=0.0,
+		stop=None
 	)
-    return response.choices[0].message.content
+	return response.choices[0].text.strip()
 
 def runCommand(query):
-	command = query[0]
+	command = query.pop(0)
 
-	if command == 'wikipedia':
-		speak('Searching Wikipedia...')
-		query = query.replace('wikipedia', '')
-		results = wikipedia.summary(query, sentences=2)
+	if command == 'search' and query[0] == 'for':
+		query.pop(0)
+
+		query = ' '.join(query)
 		speak('According to Wikipedia')
+		results = wikipedia.summary(query, sentences=2)
 		speak(results)
-	
+
 	elif command == 'open':
-		speak(f'Opening {query[1]}...')
-		webbrowser.open(f'https://www.{query[1]}.com')
-	
-	elif command == 'ask' and query[1] == 'chat' and query[2] == 'GTP':
+		speak(f'Opening {query[0]}...')
+		webbrowser.open(f'https://www.{query[0]}.com')
+
+	elif command == 'ask' and query[0] == 'chat' and query[1] == 'gpt':
 		speak('What is your question?')
 		question = takeCommand()
 		speak('Searching...')
@@ -105,16 +88,15 @@ def runCommand(query):
 		speak(answer)
 
 if __name__ == '__main__':
-	#wishMe()
+	greet()
 	while True:
-		query = takeCommand(pause_threshold = 1).lower()
-		# Check if query contains any activation word
-		if any(phrase in query.lower() for phrase in activationPhrases):
+		query = takeCommand().lower()
+
+		if any(phrase in query for phrase in activationPhrases):
 			query = query.split()
 
-        # Remove the activation phrase from the query
 			for phrase in activationPhrases:
-				if ' '.join(query).lower().startswith(phrase):
+				if ' '.join(query).startswith(phrase):
 					query = query[len(phrase.split()):]
 					break
 
@@ -124,9 +106,15 @@ if __name__ == '__main__':
 
 				query = takeCommand().lower()
 
-				if any(phrase in query.lower() for phrase in shutdownPhrases):
+				for phrase in activationPhrases:
+					if ' '.join(query).startswith(phrase):
+						query = query[len(phrase.split()):]
+						break
+
+				if any(phrase in query for phrase in shutdownPhrases):
+					speak('as you wish, sir. I will be here if you need me.')
 					break
 				else:
 					runCommand(query.split())
-		
-			
+		elif any(phrase in query for phrase in shutdownPhrases):
+			break
