@@ -6,6 +6,8 @@ import libs.openai_helper as openai
 import libs.brain as brain
 from libs.training import traing_model
 import json
+import threading
+import time
 
 import os
 import speech_recognition as sr
@@ -17,6 +19,8 @@ import openpyxl as xl
 language = "en"
 
 intents = json.loads(open('intents.json').read())
+
+standby = True
 
 def takeCommand(pause_threshold=1):
 	r = sr.Recognizer()
@@ -38,11 +42,40 @@ def runCommand(res, userIntent=None):
 	tag = res.get('tag')
 	response = res.get('response')
 	action = res.get('action')
+	global standby
+	
+	if action == 'start':
+		standby = False
+		if standby == True:
+			voice.speak(response)
+		else:
+			voice.speak('I am already awake.')
+		return
+	elif action == 'exit':
+		if standby == True:
+			shutdown()
+		else:
+			standby = True
+			voice.speak('I will enter standby mode´.')
+		return
+	elif action == 'shutdown':
+		shutdown()
+		return
+	
+	if standby == True:
+		return
 	
 	if action == 'none':
-		voice.speak(response)
+		if response != "":
+			voice.speak(response)
 		return
-	elif action == 'open':
+	elif action == 'train':
+		train()
+		return
+	elif response != "":
+		voice.speak(response)
+	
+	if action == 'open':
 		openApp()
 	elif action == 'search':
 		search()
@@ -52,8 +85,6 @@ def runCommand(res, userIntent=None):
 		write()
 	elif action == 'ask_chat_gpt':
 		ask_chat_gpt()
-	elif action == 'exit':
-		exit()
 	else:
 		voice.speak('Sorry, I don\'t know how to do that yet.')
 
@@ -84,7 +115,27 @@ def write():
 	voice.speak('Writing...')
 	voice.write(text)
 
+def shutdown():
+	voice.speak('Goodbye!')
+	my_thread.join()
+	exit()
+
+def train():
+	return
+
+def my_thread_function():
+	while True:
+		# do something here ...
+		print('thread')
+		time.sleep(1)
+
+
+my_thread = threading.Thread(target=my_thread_function)
+
 def run():
+	# start an other thread
+	my_thread.start()
+
 	while True:
 		query = takeCommand().lower()
 
@@ -103,8 +154,3 @@ def init():
 	voice.init()
 	
 	#traing_model()
-
-	ints = brain.predict_class("hey")
-	res = brain.get_response(ints, intents)
-
-	runCommand(res)
