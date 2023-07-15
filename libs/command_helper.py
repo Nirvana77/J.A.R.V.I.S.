@@ -3,26 +3,20 @@
 from dotenv import load_dotenv
 import libs.voice as voice
 import libs.openai_helper as openai
+import libs.brain as brain
+from libs.training import traing_model
+import json
 
 import os
 import speech_recognition as sr
 import wikipedia
 import webbrowser
-import datetime
 import random
 import openpyxl as xl
 
 language = "en"
 
-greetings = []
-activationPhrases = []
-shutdownPhrases = []
-
-commands = {}
-
-Responses_table = None
-User_table = None
-Commands_table = None
+intents = json.loads(open('intents.json').read())
 
 def takeCommand(pause_threshold=1):
 	r = sr.Recognizer()
@@ -71,59 +65,23 @@ def run():
 	while True:
 		query = takeCommand().lower()
 
-		if any(phrase in query for phrase in commands['activationPhrases'][0]):
-			query = query.split()
+		if 'none' == query:
+			continue
+		else:
+			ints = brain.predict_class(query)
+			res = brain.get_response(ints, intents)
+			voice.speak(res)
 
-			for phrase in commands['activationPhrases'][0]:
-				if ' '.join(query).startswith(phrase):
-					query = query[len(phrase.split()):]
-					break
-
-			runCommand(query)
-
-			while True:
-
-				query = takeCommand().lower()
-
-				for phrase in commands['activationPhrases'][0]:
-					if ' '.join(query).startswith(phrase):
-						query = query[len(phrase.split()):]
-						break
-
-				if any(phrase in query for phrase in commands['shutdownPhrases'][0]):
-					voice.speak('as you wish, sir. I will be here if you need me.')
-					break
-				else:
-					runCommand(query.split())
-		elif any(phrase in query for phrase in commands['shutdownPhrases'][0]):
-			break
 
 def init():
 	load_dotenv()
 	language = os.getenv('language')
 
 	voice.init()
+	
+	#traing_model()
 
-	wb = xl.load_workbook('commands.xlsx')
-	User_table = wb['User']
-	Responses_table = wb['Responses']
-	Commands_table = wb['Commands']
+	ints = brain.predict_class("hey")
+	res = brain.get_response(ints, intents)
 
-	user = list(User_table.iter_rows(values_only=True))
-	responses = list(Responses_table.iter_rows(values_only=True))
-
-	# Extract the commands and responses
-	for i, row in enumerate(Commands_table.iter_rows(values_only=True)):
-		command_name = row[0]
-		user_commands = [value for value in user[i] if value is not None]
-		ai_responses = [value for value in responses[i] if value is not None]
-		commands[command_name] = (user_commands, ai_responses)
-
-	# Print the extracted commands and responses
-	for command, (user_commands, ai_responses) in commands.items():
-		print(f"Command: {command}")
-		print(f"User Commands: {user_commands}")
-		print(f"AI Responses: {ai_responses}")
-		print()
-
-	voice.speak(greet())
+	voice.speak(res)

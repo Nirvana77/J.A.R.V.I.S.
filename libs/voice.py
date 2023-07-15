@@ -2,7 +2,7 @@ import pyttsx3
 
 engine = None
 
-def speak(text, rate=150):
+def speak(text:str, rate:int=150):
 	print(f'Jarvis: {text}')
 	engine.setProperty('rate', rate)
 	engine.say(text)
