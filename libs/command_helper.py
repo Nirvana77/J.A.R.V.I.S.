@@ -34,32 +34,55 @@ def takeCommand(pause_threshold=1):
 	
 	return statement
 
-def runCommand(query):
-	command = query.pop(0)
+def runCommand(res, userIntent=None):
+	tag = res.get('tag')
+	response = res.get('response')
+	action = res.get('action')
+	
+	if action == 'none':
+		voice.speak(response)
+		return
+	elif action == 'open':
+		openApp()
+	elif action == 'search':
+		search()
+	elif action == 'play':
+		play()
+	elif action == 'write':
+		write()
+	elif action == 'ask_chat_gpt':
+		ask_chat_gpt()
+	elif action == 'exit':
+		exit()
+	else:
+		voice.speak('Sorry, I don\'t know how to do that yet.')
 
-	if command == 'search' and query[0] == 'for':
-		query.pop(0)
+def openApp(query):
+	voice.speak(f'Opening {query}...')
+	webbrowser.open(f'https://www.{query}.com')
 
-		query = ' '.join(query)
+def search(query):
+	voice.speak(f'Searching for {query} on Wikipedia...')
+	results = wikipedia.summary(query, sentences=2)
+	voice.speak('According to Wikipedia...')
+	voice.speak(results)
 
-		voice.speak(f'Searching for {query} on Wikipedia...')
-		results = wikipedia.summary(query, sentences=2)
-		voice.speak('According to Wikipedia')
-		voice.speak(results)
+def ask_chat_gpt():
+	voice.speak('What is your question?')
+	question = takeCommand()
+	voice.speak('Searching...')
+	answer = openai.ask_gpt3(question)
+	voice.speak(answer)
 
-	elif command == 'open':
-		voice.speak(f'Opening {query[0]}...')
-		webbrowser.open(f'https://www.{query[0]}.com')
+def play(query):
+	voice.speak(f'Playing {query} on YouTube...')
+	webbrowser.open(f'https://www.youtube.com/results?search_query={query}')
 
-	elif command == 'ask' and query[0] == 'chat' and query[1] == 'gpt':
-		voice.speak('What is your question?')
-		question = takeCommand()
-		voice.speak('Searching...')
-		answer = openai.ask_gpt3(question)
-		voice.speak(answer)
-
-def greet():
-	return random.choice(commands['greetings'][1])
+def write():
+	voice.speak('What do you want me to write?')
+	text = takeCommand()
+	voice.speak('Writing...')
+	voice.write(text)
 
 def run():
 	while True:
@@ -70,7 +93,7 @@ def run():
 		else:
 			ints = brain.predict_class(query)
 			res = brain.get_response(ints, intents)
-			voice.speak(res)
+			runCommand(res)
 
 
 def init():
@@ -84,4 +107,4 @@ def init():
 	ints = brain.predict_class("hey")
 	res = brain.get_response(ints, intents)
 
-	voice.speak(res)
+	runCommand(res)

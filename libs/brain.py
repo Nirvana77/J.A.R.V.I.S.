@@ -42,6 +42,7 @@ def predict_class(sentence):
 
     return_list = []
 
+    print(classes)
     for r in results:
         return_list.append({'intent': classes[r[0]], 'probability': str(r[1])})
     
@@ -53,7 +54,7 @@ def get_response(intents_list, intents_json) -> str:
 
     for i in list_of_intents:
         if i['tag'] == tag:
-            result = random.choice(i['responses'])
+            result = {'response': random.choice(i['responses']), 'tag': tag, 'action': i['action']}
             break
     
     return result
