@@ -2,39 +2,73 @@
 	"intents": [
 		{
 			"tag": "greeting",
-			"patterns": ["Hi", "How are you", "Is anyone there?", "Hello", "Good day"],
-			"responses": ["Hello, thanks for visiting", "Good to see you again", "Hi there, how can I help?"],
-			"action": "none"
+			"patterns": [
+				"JARVIS are you up?",
+				"JARVIS are you there?",
+				"JARVIS are you online?",
+				"JARVIS are you alive?",
+				"JARVIS are you awake?",
+				"JARVIS are you listening?",
+				"JARVIS are you ready?",
+				"JARVIS are you ok?",
+				"JARVIS are you busy?",
+				"JARVIS are you free?",
+				"JARVIS are you working?",
+				"JARVIS are you available?",
+				"JARVIS"
+			],
+			"responses": ["Good to see you again", "Hi there, how can I help?", "Hello, how can I help?"],
+			"action": "start"
 		},
 		{
 			"tag": "goodbye",
-			"patterns": ["Bye", "See you later", "Goodbye"],
-			"responses": ["See you later, thanks for visiting", "Have a nice day", "Bye! Come back again soon."],
+			"patterns": [
+				"Bye",
+				"See you later",
+				"Goodbye",
+				"shutdown JARVIS",
+				"stop JARVIS",
+				"exit JARVIS",
+				"quit JARVIS",
+				"close JARVIS",
+				"standby JARVIS",
+				"sleep JARVIS",
+				"go to sleep JARVIS",
+				"go to standby JARVIS",
+				"go to standby mode JARVIS"
+			],
+			"responses": ["I will be here if you need me", "See you later", "Goodbye!", ""],
 			"action": "exit"
+		},
+		{
+			"tag": "shutdown",
+			"patterns": ["shutdown JARVIS", "stop JARVIS", "exit JARVIS", "quit JARVIS", "close JARVIS", "sleep JARVIS", "JARVIS shutdown"],
+			"responses": ["I will shutdown now!", "Goodbye!"],
+			"action": "shutdown"
 		},
 		{
 			"tag": "thanks",
 			"patterns": ["Thanks", "Thank you", "That's helpful"],
 			"responses": ["Happy to help!", "Any time!", "My pleasure"],
-			"action": "express_gratitude"
+			"action": "none"
 		},
 		{
 			"tag": "hours",
 			"patterns": ["What hours are you open?", "What are your hours?", "When are you open?"],
 			"responses": ["We're open every day 9am-9pm", "Our hours are 9am-9pm every day"],
-			"action": "provide_hours"
+			"action": "none"
 		},
 		{
 			"tag": "payments",
 			"patterns": ["Do you take credit cards?", "Do you accept Mastercard?", "Are you cash only?"],
 			"responses": ["We accept VISA, Mastercard and AMEX", "We accept most major credit cards"],
-			"action": "provide_payment_info"
+			"action": "none"
 		},
 		{
 			"tag": "opentoday",
 			"patterns": ["Are you open today?", "When do you open today?", "What are your hours today?"],
 			"responses": ["We're open every day from 9am-9pm", "Our hours are 9am-9pm every day"],
-			"action": "check_opening_hours"
+			"action": "none"
 		}
 	]
 }

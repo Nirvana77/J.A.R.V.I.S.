@@ -13,7 +13,7 @@ lemmatizer = WordNetLemmatizer()
 words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 
-model = load_model('chatbot_model.h5')
+model = load_model('JARVIS_model.keras')
 
 def clean_up_sentence(sentence):
     sentence_words = nltk.word_tokenize(sentence)
@@ -61,6 +61,7 @@ def get_response(intents_list, intents_json) -> str:
 
 if __name__ == '__main__':
     print('JARVIS is ready to chat!')
+    intents = json.loads(open('intents.json').read())
     while True:
         message = input('')
         ints = predict_class(message)
