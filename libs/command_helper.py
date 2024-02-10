@@ -79,7 +79,19 @@ def runCommand(res, userIntent=None):
 	if action == 'ask_chat_gpt':
 		ask_chat_gpt()
 	else:
-		voice.speak('Sorry, I don\'t know how to do that yet.')
+		if action:
+			try:
+				# Import the module dynamically based on the action
+				module = importlib.import_module(f'actions.{action}')
+				# Call the run function inside the module with userIntent as argument
+				module.run(userIntent)
+			except ImportError:
+				voice.speak('Sorry, I don\'t know how to do that yet.')
+			except AttributeError:
+				voice.speak('The action module does not have a run function.')
+		else:
+			# Handle the case where no action is specified
+			voice.speak('Sorry, I don\'t know how to do that yet.')
 
 def ask_chat_gpt():
 	voice.speak('What is your question?')
@@ -96,9 +108,16 @@ def shutdown():
 	exit()
 
 def my_thread_function():
-	while True:
-		# do something here ...
-		print('thread')
+	global will_run
+	global lastTraining
+
+	lastModif = os.path.getmtime('intents.json')
+
+	while will_run:
+		if lastModif != os.path.getmtime('intents.json'):
+			lastModif = os.path.getmtime('intents.json')
+			traing.traing_model()
+
 		time.sleep(1)
 
 my_thread = threading.Thread(target=my_thread_function)
@@ -143,3 +162,6 @@ def init():
 	brain.init()
 	
 	#traing_model()
+
+if __name__ == '__main__':
+	init()
