@@ -69,6 +69,30 @@
 			"patterns": ["Are you open today?", "When do you open today?", "What are your hours today?"],
 			"responses": ["We're open every day from 9am-9pm", "Our hours are 9am-9pm every day"],
 			"action": "none"
+		},
+		{
+			"tag": "open",
+			"patterns": ["Open {intent}", "Open {intent} for me", "Open {intent} please", "Open {intent} JARVIS"],
+			"responses": ["Opening {intent}"],
+			"action": "open"
+		},
+		{
+			"tag": "search",
+			"patterns": ["Search {intent}", "Search {intent} for me", "Search {intent} please", "Search {intent} JARVIS"],
+			"responses": ["Searching for {intent}"],
+			"action": "search"
+		},
+		{
+			"tag": "weather",
+			"patterns": ["What's the weather like?", "How's the weather today?", "What's the weather today?"],
+			"responses": ["The weather is nice", "It's sunny", "It's raining"],
+			"action": "none"
+		},
+		{
+			"tag": "train",
+			"patterns": ["JARVIS, train with the new data", "JARVIS, train with the new data please", "JARVIS, train with the new data now"],
+			"responses": ["Training with the new data..."],
+			"action": "train"
 		}
 	]
 }
