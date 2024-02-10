@@ -10,10 +10,9 @@ from tensorflow.keras.models import load_model
 
 lemmatizer = WordNetLemmatizer()
 
-words = pickle.load(open('words.pkl', 'rb'))
-classes = pickle.load(open('classes.pkl', 'rb'))
-
-model = load_model('JARVIS_model.keras')
+words = None
+classes = None
+model = None
 
 def clean_up_sentence(sentence):
     sentence_words = nltk.word_tokenize(sentence)
@@ -58,6 +57,14 @@ def get_response(intents_list, intents_json) -> str:
             break
     
     return result
+
+def init():
+    global words, classes, model
+
+    words = pickle.load(open('words.pkl', 'rb'))
+    classes = pickle.load(open('classes.pkl', 'rb'))
+
+    model = load_model('JARVIS_model.keras')
 
 if __name__ == '__main__':
     print('JARVIS is ready to chat!')

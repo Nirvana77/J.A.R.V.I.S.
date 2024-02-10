@@ -76,5 +76,13 @@ def traing_model():
 
     print('Done')
 
+# Check if the model exists
+def model_exists():
+    try:
+        model = open('JARVIS_model.keras')
+        return True
+    except:
+        return False
+
 if __name__ == '__main__':
     traing_model()

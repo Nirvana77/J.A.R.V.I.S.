@@ -1,28 +1,27 @@
 
 
+import importlib
 from dotenv import load_dotenv
 import libs.voice as voice
 import libs.openai_helper as openai
 import libs.brain as brain
-from libs.training import traing_model
+import libs.training as traing
 import json
 import threading
 import time
 
 import os
 import speech_recognition as sr
-import wikipedia
-import webbrowser
-import random
-import openpyxl as xl
 
 language = "en"
 
 intents = json.loads(open('intents.json').read())
 
 standby = True
+will_run = True
 
 def takeCommand(pause_threshold=1):
+	global language
 	r = sr.Recognizer()
 	r.pause_threshold = pause_threshold
 	with sr.Microphone() as source:
@@ -90,7 +89,9 @@ def ask_chat_gpt():
 	voice.speak(answer)
 
 def shutdown():
+	global will_run
 	voice.speak('Goodbye!')
+	will_run = False
 	my_thread.join()
 	exit()
 
@@ -119,8 +120,26 @@ def run():
 
 def init():
 	load_dotenv()
+	global language
 	language = os.getenv('language')
+	global lastTraining
+
+	# Check the creation date of the model
+	# If it is older than 7 days, train the model again
+	# If the model does not exist, train the model
+	if not traing.model_exists():
+		print('Training model...')
+		traing.traing_model()
+		print('Done')
+	else:
+		cration_date = os.path.getctime('JARVIS_model.keras')
+		lastTraining = time.time() - cration_date
+		if lastTraining > 604800: # 7 days in seconds
+			print('Training model...')
+			traing.traing_model()
+			print('Done')
 
 	voice.init()
+	brain.init()
 	
 	#traing_model()
