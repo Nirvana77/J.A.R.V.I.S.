@@ -45,11 +45,11 @@ def runCommand(res, userIntent=None):
 	global standby
 	
 	if action == 'start':
-		standby = False
 		if standby == True:
 			voice.speak(response)
 		else:
 			voice.speak('I am already awake.')
+		standby = False
 		return
 	elif action == 'exit':
 		if standby == True:
@@ -70,33 +70,17 @@ def runCommand(res, userIntent=None):
 			voice.speak(response)
 		return
 	elif action == 'train':
-		train()
+		voice.speak('Training with the new data')
+		threading.Thread(target=traing.traing_model).start()
 		return
 	elif response != "":
 		voice.speak(response)
 	
-	if action == 'open':
-		openApp()
-	elif action == 'search':
-		search()
-	elif action == 'play':
-		play()
-	elif action == 'write':
-		write()
-	elif action == 'ask_chat_gpt':
+	
+	if action == 'ask_chat_gpt':
 		ask_chat_gpt()
 	else:
 		voice.speak('Sorry, I don\'t know how to do that yet.')
-
-def openApp(query):
-	voice.speak(f'Opening {query}...')
-	webbrowser.open(f'https://www.{query}.com')
-
-def search(query):
-	voice.speak(f'Searching for {query} on Wikipedia...')
-	results = wikipedia.summary(query, sentences=2)
-	voice.speak('According to Wikipedia...')
-	voice.speak(results)
 
 def ask_chat_gpt():
 	voice.speak('What is your question?')
@@ -105,30 +89,16 @@ def ask_chat_gpt():
 	answer = openai.ask_gpt3(question)
 	voice.speak(answer)
 
-def play(query):
-	voice.speak(f'Playing {query} on YouTube...')
-	webbrowser.open(f'https://www.youtube.com/results?search_query={query}')
-
-def write():
-	voice.speak('What do you want me to write?')
-	text = takeCommand()
-	voice.speak('Writing...')
-	voice.write(text)
-
 def shutdown():
 	voice.speak('Goodbye!')
 	my_thread.join()
 	exit()
-
-def train():
-	return
 
 def my_thread_function():
 	while True:
 		# do something here ...
 		print('thread')
 		time.sleep(1)
-
 
 my_thread = threading.Thread(target=my_thread_function)
 
